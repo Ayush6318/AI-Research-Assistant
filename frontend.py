@@ -18,7 +18,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-API_URL = "http://127.0.0.1:8000/chat"
+API_URL = "https://your-render-app.onrender.com/chat"
 
 
 with st.sidebar:
