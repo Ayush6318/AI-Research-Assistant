@@ -18,7 +18,7 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-API_URL = "https://your-render-app.onrender.com/chat"
+API_URL = "https://ai-research-assistant-xku3.onrender.com/chat"
 
 
 with st.sidebar:
