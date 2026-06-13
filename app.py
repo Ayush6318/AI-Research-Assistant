@@ -1,3 +1,5 @@
+
+
 from dotenv import load_dotenv
 import os
 
@@ -45,20 +47,34 @@ def home():
     return {"message": "AI Research Assistant is running"}
 
 
+import os
+import uuid
+
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
 
-    file_path = f"uploads/{file.filename}"
+    try:
+        os.makedirs("uploads", exist_ok=True)
 
-    with open(file_path, "wb") as f:
-        f.write(await file.read())
+        filename = f"{uuid.uuid4()}.pdf"
+        file_path = os.path.join("uploads", filename)
 
-    docs = load_pdf(file_path)
-    chunks = split_documents(docs)
+        with open(file_path, "wb") as f:
+            f.write(await file.read())
 
-    create_vector_store(chunks)
+        docs = load_pdf(file_path)
 
-    return {"message": "PDF uploaded successfully 🚀"}
+        chunks = split_documents(docs)
+
+        create_vector_store(chunks)
+
+        return {
+            "message": "PDF uploaded successfully",
+            "chunks": len(chunks)
+        }
+
+    except Exception as e:
+        return {"error": str(e)}
 
 
 @app.post("/chat")
