@@ -85,3 +85,7 @@ AI RESEARCH ASSISTANT/
 ├── database.py
 ├── frontend.py
 └── requirements.txt
+
+## 📸 Application Preview
+
+![AI Research Assistant Interface](Screenshot 2026-06-13 211716.png)
