@@ -13,7 +13,12 @@ st.markdown("""
 <style>
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
-    header {visibility: hidden;}
+    
+    /* FIX: Make the header transparent instead of hidden so the reopen button stays visible */
+    [data-testid="stHeader"] {
+        background-color: rgba(0, 0, 0, 0);
+    }
+    
     .block-container {padding-top: 2rem;}
 </style>
 """, unsafe_allow_html=True)
