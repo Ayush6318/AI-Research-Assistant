@@ -1,7 +1,6 @@
-
-
 from dotenv import load_dotenv
 import os
+import uuid
 
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
@@ -47,12 +46,8 @@ def home():
     return {"message": "AI Research Assistant is running"}
 
 
-import os
-import uuid
-
 @app.post("/upload_pdf")
 async def upload_pdf(file: UploadFile = File(...)):
-
     try:
         os.makedirs("uploads", exist_ok=True)
 
@@ -63,9 +58,7 @@ async def upload_pdf(file: UploadFile = File(...)):
             f.write(await file.read())
 
         docs = load_pdf(file_path)
-
         chunks = split_documents(docs)
-
         create_vector_store(chunks)
 
         return {
@@ -79,13 +72,10 @@ async def upload_pdf(file: UploadFile = File(...)):
 
 @app.post("/chat")
 def chat(request: QueryRequest):
-
     query = request.query
-
     
     save_message(request.session_id, "user", query)
 
-   
     history = get_messages(request.session_id)[-10:]
     conversation_history = format_history(history)
 
@@ -97,66 +87,67 @@ Current user question:
 {query}
 """
 
+    # 1. Retrieve PDF Context First
     try:
         results = retrieve_context_with_score(query, k=3)
         # format: [(doc, score), ...]
-    except Exception:
+    except Exception as e:
+        print("RAG ERROR:", e)
         results = []
-
-    #  Decide RAG vs Agents using SCORE
- 
-    USE_RAG_THRESHOLD = 0.75  # tune later
 
     use_rag = False
     context = ""
+    best_score = None
 
+    # 2. Decide RAG vs Agents using FAISS Distance Score
     if results and len(results) > 0:
-
         best_doc, best_score = results[0]
-
-        # FAISS: lower score = better match
-        if best_score < USE_RAG_THRESHOLD:
+        
+        print("DEBUG best_score:", best_score)
+        
+        # FAISS: lower score = better match (1.2 is a solid practical threshold)
+        if best_score < 1.2: 
             use_rag = True
             context = "\n\n".join([doc.page_content for doc, _ in results])
 
- 
-    route = classify_query(router_chain, query)
-
+    # 3. Route Execution based on the RAG decision
     if use_rag:
         response = rag_chain.invoke({
             "context": context,
             "question": query
         })
-
         final_route = "rag"
-
     else:
+        # Only call the LLM router if we aren't using the PDF context
+        route = classify_query(router_chain, query)
+        
         if route == "coding":
             response = coding_chain.invoke({
                 "question": enhanced_query
             })
-
         elif route == "summary":
             response = summary_chain.invoke({
                 "question": enhanced_query
             })
-
         else:
             response = research_chain.invoke({
                 "question": enhanced_query
             })
-
+            
         final_route = route
 
-  
+    # Extract answer string
     answer = getattr(response, "content", response)
 
     save_message(request.session_id, "assistant", answer)
 
     history = get_messages(request.session_id)
 
+    # 4. Return standard data + Debug Info
     return {
         "route": final_route,
         "answer": answer,
-        "history": history
+        "history": history,
+        "debug_score": float(best_score) if best_score is not None else None,
+        "debug_context_preview": context[:300] if context else None
     }
