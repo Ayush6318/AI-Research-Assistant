@@ -86,7 +86,7 @@ AI RESEARCH ASSISTANT/
 ├── frontend.py
 └── requirements.txt
 
-
+```
 ## 📸 Application Preview
 
 ![AI Research Assistant Interface](app_frontpage.png)
