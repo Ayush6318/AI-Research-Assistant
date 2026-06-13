@@ -2,10 +2,8 @@ from dotenv import load_dotenv
 import os
 import uuid
 
-from fastapi import FastAPI, UploadFile, File, Form
+from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
-
-from langchain_google_genai import ChatGoogleGenerativeAI
 
 from agents.research_agent import get_research_chain
 from agents.coding_agent import get_coding_chain
@@ -48,8 +46,8 @@ def home():
 
 @app.post("/upload_pdf")
 async def upload_pdf(
-    file: UploadFile = File(...),
-    session_id: str = Form(...) 
+    session_id: str,  # Passed cleanly as a query parameter to avoid multipart errors
+    file: UploadFile = File(...) 
 ):
     try:
         os.makedirs("uploads", exist_ok=True)
@@ -63,7 +61,7 @@ async def upload_pdf(
         docs = load_pdf(file_path)
         chunks = split_documents(docs)
         
-        # Saves this specific PDF to a folder named after the session_id
+        # Saves this specific PDF to an isolated session folder
         create_vector_store(chunks, index_name=session_id)
 
         return {
@@ -93,7 +91,7 @@ Current user question:
 """
 
     try:
-        # Retrieves only from the folder named after the session_id
+        # Retrieves only from the isolated folder
         results = retrieve_context_with_score(query, k=3, index_name=request.session_id)
     except Exception as e:
         print("RAG ERROR:", e)
