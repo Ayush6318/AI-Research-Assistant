@@ -5,6 +5,9 @@ import uuid
 from fastapi import FastAPI, UploadFile, File
 from pydantic import BaseModel
 
+# FIX: Added the critical missing import for the Gemini model
+from langchain_google_genai import ChatGoogleGenerativeAI
+
 from agents.research_agent import get_research_chain
 from agents.coding_agent import get_coding_chain
 from agents.summary_agent import get_summary_chain
@@ -46,7 +49,7 @@ def home():
 
 @app.post("/upload_pdf")
 async def upload_pdf(
-    session_id: str,  # Passed cleanly as a query parameter to avoid multipart errors
+    session_id: str,  
     file: UploadFile = File(...) 
 ):
     try:
