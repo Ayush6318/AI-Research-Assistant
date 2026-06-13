@@ -88,4 +88,4 @@ AI RESEARCH ASSISTANT/
 
 ## 📸 Application Preview
 
-![AI Research Assistant Interface](app_frontpage.png)
+![AI Research Assistant Interface](app_front_page.png)
