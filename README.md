@@ -88,4 +88,4 @@ AI RESEARCH ASSISTANT/
 
 ## 📸 Application Preview
 
-![AI Research Assistant Interface](Screenshot 2026-06-13 211716.png)
+![AI Research Assistant Interface](app_frontpage.png)
